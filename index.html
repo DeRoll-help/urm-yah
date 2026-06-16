@@ -197,7 +197,7 @@
         }
         .bg-seal {
             position: absolute; width: 220px; height: 220px;
-            background-image: url('./img/sappy-seal.gif');
+            background-image: url('img/sappy-seal.gif');
             background-size: contain; background-repeat: no-repeat;
             left: -70px; opacity: 0;
             animation: sealSwimRight 12s infinite linear;
@@ -404,9 +404,7 @@
 
     <div class="btn-replay-story" id="replayBtn" onclick="showStoryAgain()" title="Lihat Pesan Pembuka">💬</div>
     <div class="music-toggle" id="musicBtn" onclick="toggleMusic()">🔇</div>
-    <audio id="bgmMusic" loop>
-        <source src="./img/music.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgmMusic" loop src="img/music.mp3"></audio>
     <div class="bubbles" id="bubble-container"></div>
 
     <div class="split-layout">
@@ -563,14 +561,14 @@
             const btnNo = document.getElementById('btn-no');
             btnNo.style.position = ''; btnNo.style.left = ''; btnNo.style.top = '';
 
-            // Putar musik secara resmi setelah interaksi klik yang disukai browser
+            // Putar musik secara resmi
             const bgm = document.getElementById('bgmMusic');
             const musicBtn = document.getElementById('musicBtn');
             bgm.volume = 0.5;
             bgm.play().then(() => {
                 musicBtn.innerText = "🎵";
                 isMusicPlaying = true;
-            }).catch(err => console.log("Musik tertahan browser:", err));
+            }).catch(err => console.log("Musik tertahan:", err));
 
             // Jalankan urutan teks cerita
             document.getElementById('story-1').classList.add('active');
@@ -683,7 +681,7 @@
                     musicBtn.innerText = "🎵";
                     isMusicPlaying = true;
                 }).catch(e => {
-                    alert("Gagal memuat musik. Pastikan nama file lagu di folder github sudah sesuai ya! 🦭");
+                    alert("Gagal memuat musik. Pastikan file lagu sudah ditaruh di folder yang sama ya! 🦭");
                 });
             }
         }
@@ -808,11 +806,6 @@
             const box = document.getElementById('sizeControlBox');
             const slider = document.getElementById('stickerSizeSlider');
             box.style.display = 'flex'; slider.value = currentSize;
-        }
-
-        function shadowActiveStickerSize(newSize) {
-            // Kompatibilitas fungsi penyesuaian ukuran stiker
-            changeActiveStickerSize(newSize);
         }
 
         function changeActiveStickerSize(newSize) {
