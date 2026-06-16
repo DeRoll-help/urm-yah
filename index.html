@@ -404,11 +404,7 @@
 
     <div class="btn-replay-story" id="replayBtn" onclick="showStoryAgain()" title="Lihat Pesan Pembuka">💬</div>
     <div class="music-toggle" id="musicBtn" onclick="toggleMusic()">🔇</div>
-     <audio class="bgmMusic" loop autoplay>
-        <source src="./music/hbd.mpeg">
-        </source>
-        erm noooo
-    </audio>
+    <audio id="bgmMusic" loop src="img/music.mp3"></audio>
     <div class="bubbles" id="bubble-container"></div>
 
     <div class="split-layout">
@@ -538,19 +534,15 @@
         const storyIntervalDelay = 3500;
         let sequenceTimer = null;
 
-        // FUNGSI BARU: Membuat tombol "gamau." meluncur kabur secara acak
         function glideAway() {
             const btnNo = document.getElementById('btn-no');
-            
             const padding = 50;
-            // Hitung koordinat batas layar aman
             const maxX = window.innerWidth - btnNo.offsetWidth - padding;
             const maxY = window.innerHeight - btnNo.offsetHeight - padding;
             
             const randomX = Math.max(padding, Math.floor(Math.random() * maxX));
             const randomY = Math.max(padding, Math.floor(Math.random() * maxY));
             
-            // Ubah posisi menjadi fixed biar bisa bebas lari ke seluruh layar
             btnNo.style.position = 'fixed';
             btnNo.style.left = randomX + 'px';
             btnNo.style.top = randomY + 'px';
@@ -558,23 +550,32 @@
         }
 
         function startEverything() {
-            // Sembunyikan seluruh grup tombol awal
             document.getElementById('btn-init-group').style.display = 'none';
             
-            // Kembalikan tombol gamau ke tempat semula secara tidak terlihat (reset posisi jika di-replay nanti)
             const btnNo = document.getElementById('btn-no');
             btnNo.style.position = ''; btnNo.style.left = ''; btnNo.style.top = '';
 
-            // Putar musik secara resmi
+            // Membuka kunci Audio Context untuk browser modern
+            unlockAudio();
+
             const bgm = document.getElementById('bgmMusic');
             const musicBtn = document.getElementById('musicBtn');
             bgm.volume = 0.5;
+            
+            // Coba putar musik utama
             bgm.play().then(() => {
                 musicBtn.innerText = "🎵";
                 isMusicPlaying = true;
-            }).catch(err => console.log("Musik tertahan:", err));
+            }).catch(err => {
+                console.warn("Jalur utama 'img/music.mp3' gagal, mencoba jalur alternatif 'music.mp3'...", err);
+                // Jika ditaruh langsung tanpa folder img di GitHub, coba ganti src dinamis
+                bgm.src = "music.mp3";
+                bgm.play().then(() => {
+                    musicBtn.innerText = "🎵";
+                    isMusicPlaying = true;
+                }).catch(e2 => console.error("Kedua jalur audio gagal.", e2));
+            });
 
-            // Jalankan urutan teks cerita
             document.getElementById('story-1').classList.add('active');
             playStorySequence();
         }
@@ -609,13 +610,8 @@
             confetti({ particleCount: 140, spread: 80, origin: { y: 0.6 }, colors: ['#38bdf8', '#0284c7', '#bae6fd', '#e0f2fe', '#ffd166'] });
         }
 
-        function closeEntranceAndStart() {
-            closeEntranceScreen();
-        }
-
         function showStoryAgain() {
             currentStoryStep = 1;
-            // Sembunyikan tombol pilihan saat cerita di-replay kembali lewat icon bubble chat
             if(document.getElementById('btn-init-group')) {
                 document.getElementById('btn-init-group').style.display = 'none';
             }
@@ -669,8 +665,6 @@
             const context = new (window.AudioContext || window.webkitAudioContext)();
             if (context.state === 'suspended') { context.resume(); }
             audioUnlocked = true;
-            window.removeEventListener('click', unlockAudio);
-            window.removeEventListener('touchstart', unlockAudio);
         }
         window.addEventListener('click', unlockAudio);
         window.addEventListener('touchstart', unlockAudio);
@@ -681,11 +675,19 @@
                 musicBtn.innerText = "🔇";
                 isMusicPlaying = false;
             } else {
+                unlockAudio();
                 bgm.play().then(() => {
                     musicBtn.innerText = "🎵";
                     isMusicPlaying = true;
                 }).catch(e => {
-                    alert("Gagal memuat musik. Pastikan file lagu sudah ditaruh di folder yang sama ya! 🦭");
+                    // Fallback seandainya jalur 'img/music.mp3' mati di tombol toggle
+                    bgm.src = "music.mp3";
+                    bgm.play().then(() => {
+                        musicBtn.innerText = "🎵";
+                        isMusicPlaying = true;
+                    }).catch(e2 => {
+                        alert("Gagal memuat musik. Pastikan huruf besar/kecil nama folder 'img' dan file 'music.mp3' di repositori GitHub sudah sama persis ya! 🦭");
+                    });
                 });
             }
         }
